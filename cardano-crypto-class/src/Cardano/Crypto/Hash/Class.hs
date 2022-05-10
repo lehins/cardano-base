@@ -164,10 +164,11 @@ hashFromBytes ::
   -> Maybe (Hash h a)
 hashFromBytes bytes
   | BS.length bytes == fromIntegral (sizeHash (Proxy :: Proxy h))
-  = Just $ UnsafeHashRep (packPinnedBytes bytes)
+  = Just $! UnsafeHashRep (packPinnedBytes bytes)
 
   | otherwise
   = Nothing
+{-# INLINE hashFromBytes #-}
 
 -- | Make a hash from it bytes representation, as a 'ShortByteString'.
 --
@@ -177,6 +178,7 @@ hashFromBytesShort ::
   -- ^ It must be a buffer of exact length, as given by 'sizeHash'.
   -> Maybe (Hash h a)
 hashFromBytesShort bytes = UnsafeHashRep <$> packBytesMaybe bytes 0
+{-# INLINE hashFromBytesShort #-}
 
 -- | Just like `hashFromBytesShort`, but allows using a region of a 'ShortByteString'.
 --
@@ -188,6 +190,7 @@ hashFromOffsetBytesShort ::
   -- ^ Offset in number of bytes
   -> Maybe (Hash h a)
 hashFromOffsetBytesShort bytes offset = UnsafeHashRep <$> packBytesMaybe bytes offset
+{-# INLINE hashFromOffsetBytesShort #-}
 
 
 -- | The representation of the hash as bytes, as a 'ShortByteString'.
