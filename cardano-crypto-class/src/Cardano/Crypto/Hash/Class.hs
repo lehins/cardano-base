@@ -164,7 +164,7 @@ hashFromBytes ::
   -> Maybe (Hash h a)
 hashFromBytes bytes
   | BS.length bytes == fromIntegral (sizeHash (Proxy :: Proxy h))
-  = Just $! UnsafeHashRep (packPinnedBytes bytes)
+  = Just $ UnsafeHashRep (packPinnedBytes bytes)
 
   | otherwise
   = Nothing
@@ -207,6 +207,7 @@ hashToPackedBytes (UnsafeHashRep pb) = pb
 --
 hashFromPackedBytes :: PackedBytes (SizeHash h) -> Hash h a
 hashFromPackedBytes = UnsafeHashRep
+{-# INLINE hashFromPackedBytes #-}
 
 --
 -- Rendering and parsing
