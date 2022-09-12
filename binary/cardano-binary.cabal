@@ -67,38 +67,3 @@ library
                       , text
                       , time
                       , vector
-
-test-suite test
-  import:               base, project-config
-  hs-source-dirs:       test
-  main-is:              test.hs
-  type:                 exitcode-stdio-1.0
-
-  other-modules:        Test.Cardano.Binary.SizeBounds
-                        Test.Cardano.Binary.Helpers
-                        Test.Cardano.Binary.Helpers.GoldenRoundTrip
-                        Test.Cardano.Binary.RoundTrip
-                        Test.Cardano.Binary.Serialization
-                        Test.Cardano.Binary.Drop
-                        Test.Cardano.Binary.Failure
-
-  build-depends:        base
-                      , bytestring
-                      , cardano-binary
-                      , cardano-prelude
-                      , cardano-prelude-test
-                      , cborg
-                      , containers
-                      , formatting
-                      , hedgehog
-                      , hspec
-                      , pretty-show
-                      , QuickCheck
-                      , quickcheck-instances
-                      , tagged
-                      , text
-                      , time
-                      , vector
-
-  ghc-options:          -threaded
-                        -rtsopts
