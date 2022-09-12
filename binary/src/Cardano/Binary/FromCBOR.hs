@@ -29,8 +29,6 @@ import qualified Data.ByteString.Short as SBS
 import qualified Data.ByteString.Short.Internal as SBS
 import qualified Data.Primitive.ByteArray as Prim
 import Data.Fixed (Fixed(..), Nano, Pico)
-import qualified Data.Map as M
-import qualified Data.Set as S
 import Data.Tagged (Tagged(..))
 import Data.Time.Calendar.OrdinalDate ( fromOrdinalDate )
 import Data.Time.Clock (NominalDiffTime, UTCTime(..), picosecondsToDiffTime)
@@ -406,49 +404,6 @@ decodeMapSkel fromDistinctAscList = do
       then decodeEntries (remainingPairs - 1) newKey (p : acc)
       else cborError $ DecoderErrorCanonicityViolation "Map"
 {-# INLINE decodeMapSkel #-}
-
-instance (Ord k, FromCBOR k, FromCBOR v) => FromCBOR (Map k v) where
-  fromCBOR = decodeMapSkel M.fromDistinctAscList
-
--- We stitch a `258` in from of a (Hash)Set, so that tools which
--- programmatically check for canonicity can recognise it from a normal
--- array. Why 258? This will be formalised pretty soon, but IANA allocated
--- 256...18446744073709551615 to "First come, first served":
--- https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml Currently `258` is
--- the first unassigned tag and as it requires 2 bytes to be encoded, it sounds
--- like the best fit.
-setTag :: Word
-setTag = 258
-
-decodeSetTag :: D.Decoder s ()
-decodeSetTag = do
-  t <- D.decodeTag
-  when (t /= setTag) $ cborError $ DecoderErrorUnknownTag "Set" (fromIntegral t)
-
-decodeSetSkel :: (Ord a, FromCBOR a) => ([a] -> c) -> D.Decoder s c
-decodeSetSkel fromDistinctAscList = do
-  decodeSetTag
-  n <- D.decodeListLen
-  case n of
-    0 -> return (fromDistinctAscList [])
-    _ -> do
-      firstValue <- fromCBOR
-      fromDistinctAscList <$> decodeEntries (n - 1) firstValue [firstValue]
- where
-  decodeEntries :: (FromCBOR v, Ord v) => Int -> v -> [v] -> D.Decoder s [v]
-  decodeEntries 0                 _             acc  = pure $ reverse acc
-  decodeEntries !remainingEntries previousValue !acc = do
-    newValue <- fromCBOR
-    -- Order of values needs to be strictly increasing, because otherwise
-    -- it's possible to supply lists with various amount of duplicates which
-    -- will result in the same set.
-    if newValue > previousValue
-      then decodeEntries (remainingEntries - 1) newValue (newValue : acc)
-      else cborError $ DecoderErrorCanonicityViolation "Set"
-{-# INLINE decodeSetSkel #-}
-
-instance (Ord a, FromCBOR a) => FromCBOR (Set a) where
-  fromCBOR = decodeSetSkel S.fromDistinctAscList
 
 -- | Generic decoder for vectors. Its intended use is to allow easy
 -- definition of 'Serialise' instances for custom vector
