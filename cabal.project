@@ -6,10 +6,8 @@ test-show-details: direct
 packages:
   base-deriving-via
   binary
-  binary/test
   cardano-crypto-class
   cardano-crypto-praos
-  cardano-crypto-tests
   measures
   orphans-deriving-via
   slotting
